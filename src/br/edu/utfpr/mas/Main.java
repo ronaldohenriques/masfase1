@@ -5,6 +5,8 @@
  */
 package br.edu.utfpr.mas;
 
+import java.text.ParseException;
+
 /**
  *
  * @author ronaldo
@@ -15,7 +17,7 @@ public class Main {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ParseException {
 
         LeArquivo leArquivo = new LeArquivo();
         GravaArquivo gravaArquivo = new GravaArquivo();
@@ -27,7 +29,7 @@ public class Main {
         //nomeArquivo = nomeArquivo.substring(nomeArquivo.lastIndexOf("/") + 1);
         //nomeArquivo = nomeArquivo.substring(0, nomeArquivo.indexOf("."));
         
-        nomeArquivo = nomeArquivo.replace("descompactados", "renomeadosFase1");          //Caminho doo diretório + nome do arquivo
+        nomeArquivo = nomeArquivo.replace("uncompress", "renomeados");          //Caminho doo diretório + nome do arquivo
         nomeArquivo = nomeArquivo.substring(0, nomeArquivo.lastIndexOf("."));   //Para remover a extensão
         gravaArquivo.grava(nomeArquivo, sb);                                    //PAra gravar o arquivo
     }

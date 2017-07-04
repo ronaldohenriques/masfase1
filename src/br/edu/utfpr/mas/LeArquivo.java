@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,7 +32,7 @@ public class LeArquivo {
      * @param nomearquivo Noem do arquivo a ser lido
      * @return stringbuilder já tudo OK.
      */
-    public StringBuilder leitura(String nomearquivo) {
+    public StringBuilder leitura(String nomearquivo) throws ParseException {
         StringBuilder sb = new StringBuilder();
         try {
             BufferedReader br = new BufferedReader(new FileReader(nomearquivo));
@@ -39,21 +40,18 @@ public class LeArquivo {
             int espaco = linha.indexOf(ESPACO);
 
             String nomeServidor = linha.substring(0, espaco);   //O nome deo servidor é sempre o mesmo para cada arquivo
-            linha = linha.substring(espaco + 1);                //Daí pra frente
-            espaco = linha.indexOf(ESPACO);                     //Para encontrar a data
-            String dia = linha.substring(0, espaco);            // O dia é sempre o memso para cada arquivo
-            dia = validadia(dia);                               //Para ter certeza de que é um dia
-            String hora = linha.substring(espaco + 1);          //A hora muda frquentemente
-            hora = validahora(hora);                            //Para ter certeza de que é um hora
-
+	    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	    Calendar data = Calendar.getInstance();
+	    data.setTime(sdf.parse(validadata(linha.substring(espaco + 1))));
+	    
             linha = br.readLine();                              //Le a nova linha
-
             while (linha != null) {
-                if (!linha.startsWith("procs") && !linha.startsWith(" r")) {
+                if (!linha.startsWith("procs") && !linha.startsWith(" r")) {      //Estas linhas sempre devem ser ignoradas
                     if (linha.startsWith(nomeServidor)) {
-                        hora = validahora(linha.substring(linha.lastIndexOf(ESPACO) + 1));      // PAra ter certeza de que realmente é uma hora
+                        data.setTime(sdf.parse(validadata(linha.substring(linha.indexOf(ESPACO) + 1))));
                     } else {
-                        sb.append(nomeServidor).append(" ").append(dia).append(" ").append(hora).append(" ").append(linha).append("\n");
+                        sb.append(nomeServidor).append(" ").append(sdf.format(data.getTime())).append(" ").append(linha).append("\n");
+			data.add(Calendar.SECOND, 15);
                     }
                 }
                 linha = br.readLine();  //Le a proxima linha
@@ -74,32 +72,14 @@ public class LeArquivo {
      * @return String novamente, mas validada pois realmente é uma data Acho que
      * não precisa retransformar em String, mas ssim funcionou
      */
-    private String validadia(String dia) {
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+    private String validadata(String data) {
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date resultado = null;
         try {
-            resultado = df.parse(dia);      //valida a data e transforma o tipo para data
+            resultado = df.parse(data);      //valida a data e transforma o tipo para data
         } catch (ParseException ex) {
             Logger.getLogger(LeArquivo.class.getName()).log(Level.SEVERE, null, ex);
         }
         return df.format(resultado);            //Retorna a data já transformada em string novamente
-    }
-
-    /**
-     * Para verificar se é uma hora
-     *
-     * @param hora a hora conforme lida no arquivo
-     * @return String novamete, mas parseada, ou seja, é realmente uma hora Acho
-     * que não precisa retransformar em String, mas assim funcionou
-     */
-    private String validahora(String hora) {
-        DateFormat df = new SimpleDateFormat("HH:mm:ss");
-        Date resultado = null;
-        try {
-            resultado = df.parse(hora);     //Converte para hora e a valida
-        } catch (ParseException ex) {
-            Logger.getLogger(LeArquivo.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return df.format(resultado);        //Reconverte para String e a retorna
     }
 }
